@@ -39,14 +39,18 @@ function UserMenu() {
 
   async function handleSignOut() {
     setOpen(false);
-    const { error } = await signOut();
-    if (error) {
-      toast.error(error.message || t("সাইন আউট করা যায়নি", "Could not sign out"));
-      return;
+    try {
+      const { error } = await signOut();
+      if (error) {
+        toast.error(error.message || t("সাইন আউট করা যায়নি", "Could not sign out"));
+        return;
+      }
+      toast.success(t("সফলভাবে সাইন আউট হয়েছে", "Signed out successfully"));
+      router.push("/");
+      router.refresh();
+    } catch {
+      toast.error(t("নেটওয়ার্ক সমস্যা হয়েছে। আবার চেষ্টা করুন।", "Network error. Please try again."));
     }
-    toast.success(t("সফলভাবে সাইন আউট হয়েছে", "Signed out successfully"));
-    router.push("/");
-    router.refresh();
   }
 
   return (
@@ -105,7 +109,10 @@ export default function Navbar({ categories }: { categories: Category[] }) {
   const [date, setDate] = useState(() => banglaDate(new Date(), lang));
 
   useEffect(() => {
-    setDate(banglaDate(new Date(), lang));
+    const refresh = () => setDate(banglaDate(new Date(), lang));
+    refresh();
+    const timer = window.setInterval(refresh, 60_000);
+    return () => window.clearInterval(timer);
   }, [lang]);
 
   function switchLang(next: Lang) {
@@ -116,7 +123,7 @@ export default function Navbar({ categories }: { categories: Category[] }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-base-300 bg-base-100">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2.5 sm:py-3">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-2.5 sm:flex-nowrap sm:gap-3 sm:py-3">
         <Link href="/" className="flex min-w-0 items-center gap-2.5">
           <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-lg text-primary-content sm:size-10" aria-hidden>
             🛒
@@ -129,7 +136,7 @@ export default function Navbar({ categories }: { categories: Category[] }) {
           </span>
         </Link>
 
-        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <div className="flex w-full shrink-0 items-center justify-between gap-1.5 border-t border-base-200 pt-2 sm:w-auto sm:justify-end sm:border-0 sm:pt-0">
           <div role="group" aria-label="Language" className="join">
             {(["bn", "en"] as const).map((l) => (
               <button
@@ -149,10 +156,10 @@ export default function Navbar({ categories }: { categories: Category[] }) {
             <UserMenu />
           ) : (
             <>
-              <Link href="/signin" className="btn btn-ghost btn-sm sm:btn-md">
+              <Link href="/signin" className="btn btn-ghost btn-xs sm:btn-md">
                 {t("সাইন ইন", "Sign In")}
               </Link>
-              <Link href="/signup" className="btn btn-primary btn-sm sm:btn-md">
+              <Link href="/signup" className="btn btn-primary btn-xs sm:btn-md">
                 {t("সাইন আপ", "Sign Up")}
               </Link>
             </>

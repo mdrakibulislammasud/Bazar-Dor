@@ -27,7 +27,7 @@ export default function Ticker({ products }: { products: Product[] }) {
   if (!products.length) return null;
   return (
     <div className="ticker-wrap overflow-hidden border-b border-base-300 bg-base-100" aria-label={t("আজকের দামের টিকার", "Today's price ticker")}>
-      <div className="ticker-track">
+      <div className="ticker-track" role="presentation">
         <ul className="flex">
           {products.map((p) => (
             <ItemRow key={`a-${p.id}`} p={p} lang={lang} />

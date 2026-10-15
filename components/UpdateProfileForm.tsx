@@ -25,16 +25,25 @@ export default function UpdateProfileForm({ initialName }: { initialName: string
     }
     setError("");
     setLoading(true);
-    // https://better-auth.com/docs/concepts/users-accounts#update-user
-    const { error: err } = await updateUser({ name: name.trim() });
-    setLoading(false);
-    if (err) {
-      toast.error(err.message || t("তথ্য আপডেট করা যায়নি", "Could not update your information"));
-      return;
+    try {
+      // Better Auth's documented client API: updateUser({ name }).
+      const { error: err } = await updateUser({ name: name.trim() });
+      if (err) {
+        const msg = err.message || t("তথ্য আপডেট করা যায়নি", "Could not update your information");
+        setError(msg);
+        toast.error(msg);
+        return;
+      }
+      toast.success(t("তথ্য সফলভাবে আপডেট হয়েছে", "Information updated successfully"));
+      router.push("/profile");
+      router.refresh();
+    } catch {
+      const msg = t("নেটওয়ার্ক সমস্যা হয়েছে। আবার চেষ্টা করুন।", "Network error. Please try again.");
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setLoading(false);
     }
-    toast.success(t("তথ্য সফলভাবে আপডেট হয়েছে", "Information updated successfully"));
-    router.push("/profile");
-    router.refresh();
   }
 
   return (

@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Ticker from "@/components/Ticker";
 import Footer from "@/components/Footer";
 import AppToaster from "@/components/Toaster";
-import { getCategories, getProducts } from "@/lib/api";
+import { getCategories, getProductFeed } from "@/lib/api";
 import { getLang } from "@/lib/lang";
 import { LangProvider } from "@/components/LangProvider";
 
@@ -24,7 +24,7 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [categories, products, lang] = await Promise.all([getCategories(), getProducts(), getLang()]);
+  const [categories, feed, lang] = await Promise.all([getCategories(), getProductFeed(), getLang()]);
 
   return (
     <html lang={lang} data-theme="bazardor">
@@ -39,7 +39,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="flex min-h-screen flex-col">
         <LangProvider lang={lang}>
           <Navbar categories={categories} />
-          <Ticker products={products} />
+          <Ticker products={feed.products} />
+          {feed.isSample && (
+            <p role="status" className="border-b border-warning/40 bg-warning/10 px-4 py-3 text-center text-sm">
+              {lang === "bn"
+                ? "লাইভ API অনুপলব্ধ। এখানে দেখানো পণ্যের দাম ও বাজারের তথ্য শুধু নমুনা, যাচাইকৃত বর্তমান বাজারদর নয়।"
+                : "Live price APIs are unavailable. Shown product prices and market rows are illustrative, not verified current rates."}
+            </p>
+          )}
           <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:py-8">{children}</main>
           <Footer />
           <AppToaster />

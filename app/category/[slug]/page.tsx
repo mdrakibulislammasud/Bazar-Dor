@@ -10,12 +10,12 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const category = await getCategory(decodeURIComponent(slug));
+  const category = await getCategory(slug);
   return { title: category ? category.name : "পাতাটি পাওয়া যায়নি" };
 }
 
 export default async function CategoryPage({ params }: Props) {
-  const slug = decodeURIComponent((await params).slug);
+  const slug = (await params).slug;
   const [category, products] = await Promise.all([getCategory(slug), getProducts(slug)]);
   const { lang, t } = await getT();
 

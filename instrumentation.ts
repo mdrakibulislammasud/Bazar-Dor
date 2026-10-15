@@ -7,8 +7,8 @@ export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
   try {
     const { getMigrations } = await import("better-auth/db/migration");
-    const { authOptions } = await import("./lib/auth");
-    const { runMigrations } = await getMigrations(authOptions);
+    const { auth } = await import("./lib/auth");
+    const { runMigrations } = await getMigrations(auth.options);
     await runMigrations();
   } catch (err) {
     console.error("[bazar-dor] auth migration failed:", err);

@@ -1,10 +1,10 @@
-node_modules/
-.next/
-out/
-.vercel/
+node_modules
+.next
+out
 .env
-.env.*
-!.env.example
+.env.local
 *.db
 *.db-journal
+next-env.d.ts
 *.tsbuildinfo
+.vercel

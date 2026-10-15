@@ -11,11 +11,15 @@ export default function ProfileCard({ name, email }: { name: string; email: stri
   const t = useT();
 
   async function handleSignOut() {
-    const { error } = await signOut();
-    if (error) return toast.error(error.message || t("সাইন আউট করা যায়নি", "Could not sign out"));
-    toast.success(t("সফলভাবে সাইন আউট হয়েছে", "Signed out successfully"));
-    router.push("/");
-    router.refresh();
+    try {
+      const { error } = await signOut();
+      if (error) return toast.error(error.message || t("সাইন আউট করা যায়নি", "Could not sign out"));
+      toast.success(t("সফলভাবে সাইন আউট হয়েছে", "Signed out successfully"));
+      router.push("/");
+      router.refresh();
+    } catch {
+      toast.error(t("নেটওয়ার্ক সমস্যা হয়েছে। আবার চেষ্টা করুন।", "Network error. Please try again."));
+    }
   }
 
   return (
