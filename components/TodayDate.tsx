@@ -8,6 +8,11 @@ import { useLang } from "./LangProvider";
 export default function TodayDate() {
   const lang = useLang();
   const [date, setDate] = useState(() => banglaDate(new Date(), lang));
-  useEffect(() => setDate(banglaDate(new Date(), lang)), [lang]);
+  useEffect(() => {
+    const refresh = () => setDate(banglaDate(new Date(), lang));
+    refresh();
+    const timer = window.setInterval(refresh, 60_000);
+    return () => window.clearInterval(timer);
+  }, [lang]);
   return <span suppressHydrationWarning>{date}</span>;
 }

@@ -13,7 +13,7 @@ type Props = { params: Promise<{ slug: string }> };
 export const metadata: Metadata = { title: "পণ্যের বিস্তারিত" };
 
 export default async function ProductDetailPage({ params }: Props) {
-  const slug = decodeURIComponent((await params).slug);
+  const slug = (await params).slug;
   const { lang, t } = await getT();
 
   // 🔒 Protected route — requires login
@@ -29,8 +29,9 @@ export default async function ProductDetailPage({ params }: Props) {
   const cName = catLabel(product.categoryName, lang);
   const unitFull = unitLabel(product.unit, lang);
   const unitS = unitShort(product.unit, lang);
-  const prev = product.price / (1 + product.changePct / 100);
-  const diff = Math.round(Math.abs(product.price - prev));
+  const denominator = 1 + product.changePct / 100;
+  const prev = denominator > 0 ? product.price / denominator : product.price;
+  const diff = Number.isFinite(prev) ? Math.round(Math.abs(product.price - prev)) : 0;
   const diffText = lang === "en" ? `৳${fmtNum(diff, lang)}` : `${fmtNum(diff, lang)} টাকা`;
   const changeLine =
     product.trend === "flat"
@@ -82,7 +83,7 @@ export default async function ProductDetailPage({ params }: Props) {
             <p className="text-sm opacity-80">{changeLine}</p>
             {product.description && <p className="text-xs opacity-60">{product.description}</p>}
             <div className="flex flex-wrap gap-2 pt-1">
-              {product.categoryName && (
+              {product.categorySlug && product.categoryName && (
                 <Link href={`/category/${product.categorySlug}`} className="badge badge-outline badge-primary">
                   {cName}
                 </Link>

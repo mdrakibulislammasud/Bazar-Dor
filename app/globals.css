@@ -40,8 +40,8 @@
 
 @theme {
   --font-sans: "Hind Siliguri", "Noto Sans Bengali", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --color-up: #d03739; /* ▲ price rose  (Figma: error red)   */
-  --color-down: #1a9951; /* ▼ price fell  (Figma: success green) */
+  --color-up: #1a9951; /* ▲ price increase: green per assignment */
+  --color-down: #d03739; /* ▼ price decrease: red per assignment */
   --color-flat: #6b776d;
 }
 
@@ -71,7 +71,7 @@ body {
   animation-play-state: paused;
 }
 @media (prefers-reduced-motion: reduce) {
-  .ticker-track { animation-duration: 240s; }
+  .ticker-track { animation: none; }
 }
 
 /* hide scrollbar on the category chips row but keep it scrollable */

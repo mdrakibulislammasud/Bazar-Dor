@@ -36,26 +36,37 @@ export default function SignUpForm() {
     }
 
     setLoading(true);
-    const { error } = await signUp.email({
-      name: form.name.trim(),
-      email: form.email.trim(),
-      password: form.password,
-    });
-    setLoading(false);
-
-    if (error) {
-      const exists = /exist|already/i.test(error.message ?? "") || error.status === 422;
-      const msg = exists ? t("এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট খোলা হয়েছে", "An account with this email already exists") : error.message || t("অ্যাকাউন্ট তৈরি করা যায়নি", "Could not create the account");
+    try {
+      const { error } = await signUp.email({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+      });
+      if (error) {
+        const exists = /exist|already/i.test(error.message ?? "") || error.status === 422;
+        const msg = exists ? t("এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট খোলা হয়েছে", "An account with this email already exists") : error.message || t("অ্যাকাউন্ট তৈরি করা যায়নি", "Could not create the account");
+        setErrors({ form: msg });
+        toast.error(msg);
+        return;
+      }
+      // Better Auth automatically creates a session. The assignment requires
+      // signup -> login, so clear that session before navigating.
+      const { error: signOutError } = await signOut();
+      if (signOutError) {
+        toast.error(signOutError.message || t("সাইন আউট করা যায়নি", "Could not sign out"));
+        router.refresh();
+        return;
+      }
+      toast.success(t("অ্যাকাউন্ট তৈরি হয়েছে! এখন সাইন ইন করুন", "Account created! Please sign in"));
+      router.push("/signin");
+      router.refresh();
+    } catch {
+      const msg = t("নেটওয়ার্ক সমস্যা হয়েছে। আবার চেষ্টা করুন।", "Network error. Please try again.");
       setErrors({ form: msg });
       toast.error(msg);
-      return;
+    } finally {
+      setLoading(false);
     }
-    // BetterAuth signs the new user in automatically; the brief wants the user sent to the
-    // login page instead, so end that session first (this also keeps duplicate-email errors visible).
-    await signOut();
-    toast.success(t("অ্যাকাউন্ট তৈরি হয়েছে! এখন সাইন ইন করুন", "Account created! Please sign in"));
-    router.push("/signin");
-    router.refresh();
   }
 
   return (

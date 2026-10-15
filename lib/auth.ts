@@ -9,11 +9,13 @@ import { Pool } from "pg";
  */
 function createDatabase(): BetterAuthOptions["database"] {
   const url = process.env.DATABASE_URL;
+  if (process.env.NODE_ENV === "production" && !url) {
+    throw new Error("DATABASE_URL is required in production. Configure persistent PostgreSQL before deployment.");
+  }
   if (url) {
-    return new Pool({
-      connectionString: url,
-      ssl: /localhost|127\.0\.0\.1/.test(url) ? undefined : { rejectUnauthorized: false },
-    });
+    // Configure TLS with the connection string (e.g. ?sslmode=require).
+    // Never disable certificate verification for remote databases.
+    return new Pool({ connectionString: url });
   }
   // Node's built-in SQLite (Node 22.5+) — no native module to compile.
   const sqlite = process.getBuiltinModule("node:sqlite") as typeof import("node:sqlite");
@@ -34,6 +36,12 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
   };
 }
 
+const secret = process.env.BETTER_AUTH_SECRET;
+if (process.env.NODE_ENV === "production" &&
+    (!secret || secret.length < 32 || /change-me|dev-only/i.test(secret))) {
+  throw new Error("Set a secure BETTER_AUTH_SECRET (at least 32 random characters) in production.");
+}
+
 const baseURL =
   process.env.BETTER_AUTH_URL ||
   process.env.NEXT_PUBLIC_APP_URL ||
@@ -42,7 +50,7 @@ const baseURL =
 
 export const authOptions = {
   baseURL,
-  secret: process.env.BETTER_AUTH_SECRET || "dev-only-secret-change-me-in-production-0123456789",
+  secret: secret || "dev-only-secret-change-me-in-production-0123456789",
   database: createDatabase(),
   trustedOrigins: [
     baseURL,

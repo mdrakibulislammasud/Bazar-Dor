@@ -31,21 +31,27 @@ export default function SignInForm({ redirectTo = "/" }: { redirectTo?: string }
     }
 
     setLoading(true);
-    const { error } = await signIn.email({ email: email.trim(), password });
-    setLoading(false);
-
-    if (error) {
-      const msg =
-        error.status === 401 || /invalid/i.test(error.message ?? "")
-          ? t("ইমেইল বা পাসওয়ার্ড সঠিক নয়", "Incorrect email or password")
-          : error.message || t("সাইন ইন করা যায়নি, আবার চেষ্টা করুন", "Could not sign in, please try again");
+    try {
+      const { error } = await signIn.email({ email: email.trim(), password });
+      if (error) {
+        const msg =
+          error.status === 401 || /invalid/i.test(error.message ?? "")
+            ? t("ইমেইল বা পাসওয়ার্ড সঠিক নয়", "Incorrect email or password")
+            : error.message || t("সাইন ইন করা যায়নি, আবার চেষ্টা করুন", "Could not sign in, please try again");
+        setErrors({ form: msg });
+        toast.error(msg);
+        return;
+      }
+      toast.success(t("সফলভাবে সাইন ইন হয়েছে", "Signed in successfully"));
+      router.push(redirectTo);
+      router.refresh();
+    } catch {
+      const msg = t("নেটওয়ার্ক সমস্যা হয়েছে। আবার চেষ্টা করুন।", "Network error. Please try again.");
       setErrors({ form: msg });
       toast.error(msg);
-      return;
+    } finally {
+      setLoading(false);
     }
-    toast.success(t("সফলভাবে সাইন ইন হয়েছে", "Signed in successfully"));
-    router.push(redirectTo);
-    router.refresh();
   }
 
   return (
