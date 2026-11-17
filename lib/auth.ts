@@ -54,6 +54,7 @@ const baseURL =
 
 export const authOptions = {
   baseURL,
+
   secret:
     process.env.BETTER_AUTH_SECRET ||
     "dev-only-secret-change-me-in-production-0123456789",
@@ -76,7 +77,16 @@ export const authOptions = {
     requireEmailVerification: false,
   },
 
+  // Account linking
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google"],
+    },
+  },
+
   socialProviders,
+
   plugins: [nextCookies()],
 } satisfies BetterAuthOptions;
 
